@@ -44,6 +44,7 @@ class PersonalityTest {
                 this.selectMode(e.currentTarget);
             });
         });
+
     }
 
     selectMode(card) {
@@ -150,30 +151,30 @@ class PersonalityTest {
         // Convert 1-7 scale to -3 to +3 scale for easier calculation
         const score = value - 4;
         
-        // Remove the previous score contribution
+        // Remove the previous score contribution (相反操作)
         if (dimension === 'EI') {
             if (direction === 'E') {
                 this.scores.E -= score;
             } else {
-                this.scores.I += score;
+                this.scores.I -= score; // 修复：应该使用减法（与calculateScore相反）
             }
         } else if (dimension === 'SN') {
             if (direction === 'S') {
                 this.scores.S -= score;
             } else {
-                this.scores.N += score;
+                this.scores.N -= score; // 修复：应该使用减法
             }
         } else if (dimension === 'TF') {
             if (direction === 'T') {
                 this.scores.T -= score;
             } else {
-                this.scores.F += score;
+                this.scores.F -= score; // 修复：应该使用减法
             }
         } else if (dimension === 'JP') {
             if (direction === 'J') {
                 this.scores.J -= score;
             } else {
-                this.scores.P += score;
+                this.scores.P -= score; // 修复：应该使用减法
             }
         }
     }
@@ -189,25 +190,25 @@ class PersonalityTest {
             if (direction === 'E') {
                 this.scores.E += score;
             } else {
-                this.scores.I -= score; // Reverse scoring for I
+                this.scores.I += score; // 修复：应该使用加法
             }
         } else if (dimension === 'SN') {
             if (direction === 'S') {
                 this.scores.S += score;
             } else {
-                this.scores.N -= score;
+                this.scores.N += score; // 修复：应该使用加法
             }
         } else if (dimension === 'TF') {
             if (direction === 'T') {
                 this.scores.T += score;
             } else {
-                this.scores.F -= score;
+                this.scores.F += score; // 修复：应该使用加法
             }
         } else if (dimension === 'JP') {
             if (direction === 'J') {
                 this.scores.J += score;
             } else {
-                this.scores.P -= score;
+                this.scores.P += score; // 修复：应该使用加法
             }
         }
     }
@@ -269,35 +270,47 @@ class PersonalityTest {
     }
 
     displayDimensionScores() {
-        // Calculate percentages for each dimension
-        const eiTotal = Math.abs(this.scores.E) + Math.abs(this.scores.I);
-        const snTotal = Math.abs(this.scores.S) + Math.abs(this.scores.N);
-        const tfTotal = Math.abs(this.scores.T) + Math.abs(this.scores.F);
-        const jpTotal = Math.abs(this.scores.J) + Math.abs(this.scores.P);
+        // Calculate percentages for each dimension based on absolute strength
         
         // E/I dimension
-        const ePercentage = eiTotal > 0 ? (Math.abs(this.scores.E) / eiTotal) * 100 : 50;
+        const eiDiff = Math.abs(this.scores.E - this.scores.I);
+        const eiTotal = Math.abs(this.scores.E) + Math.abs(this.scores.I);
+        let eiPercentage = eiTotal > 0 ? (eiDiff / eiTotal) * 100 : 0;
+        eiPercentage = Math.max(50, Math.min(100, 50 + eiPercentage / 2)); // 确保在50-100之间
+        
         const eDominant = this.scores.E > this.scores.I;
-        this.updateDimensionBar('ei', ePercentage, eDominant ? 'E' : 'I', 
-                               eDominant ? Math.round(ePercentage) + '% 外向' : Math.round(100-ePercentage) + '% 内向');
+        this.updateDimensionBar('ei', eiPercentage, eDominant ? 'E' : 'I', 
+                               eDominant ? Math.round(eiPercentage) + '% 外向' : Math.round(eiPercentage) + '% 内向');
         
         // S/N dimension
-        const sPercentage = snTotal > 0 ? (Math.abs(this.scores.S) / snTotal) * 100 : 50;
+        const snDiff = Math.abs(this.scores.S - this.scores.N);
+        const snTotal = Math.abs(this.scores.S) + Math.abs(this.scores.N);
+        let snPercentage = snTotal > 0 ? (snDiff / snTotal) * 100 : 0;
+        snPercentage = Math.max(50, Math.min(100, 50 + snPercentage / 2));
+        
         const sDominant = this.scores.S > this.scores.N;
-        this.updateDimensionBar('sn', sPercentage, sDominant ? 'S' : 'N',
-                               sDominant ? Math.round(sPercentage) + '% 实感' : Math.round(100-sPercentage) + '% 直觉');
+        this.updateDimensionBar('sn', snPercentage, sDominant ? 'S' : 'N',
+                               sDominant ? Math.round(snPercentage) + '% 实感' : Math.round(snPercentage) + '% 直觉');
         
         // T/F dimension
-        const tPercentage = tfTotal > 0 ? (Math.abs(this.scores.T) / tfTotal) * 100 : 50;
+        const tfDiff = Math.abs(this.scores.T - this.scores.F);
+        const tfTotal = Math.abs(this.scores.T) + Math.abs(this.scores.F);
+        let tfPercentage = tfTotal > 0 ? (tfDiff / tfTotal) * 100 : 0;
+        tfPercentage = Math.max(50, Math.min(100, 50 + tfPercentage / 2));
+        
         const tDominant = this.scores.T > this.scores.F;
-        this.updateDimensionBar('tf', tPercentage, tDominant ? 'T' : 'F',
-                               tDominant ? Math.round(tPercentage) + '% 思考' : Math.round(100-tPercentage) + '% 情感');
+        this.updateDimensionBar('tf', tfPercentage, tDominant ? 'T' : 'F',
+                               tDominant ? Math.round(tfPercentage) + '% 思考' : Math.round(tfPercentage) + '% 情感');
         
         // J/P dimension
-        const jPercentage = jpTotal > 0 ? (Math.abs(this.scores.J) / jpTotal) * 100 : 50;
+        const jpDiff = Math.abs(this.scores.J - this.scores.P);
+        const jpTotal = Math.abs(this.scores.J) + Math.abs(this.scores.P);
+        let jpPercentage = jpTotal > 0 ? (jpDiff / jpTotal) * 100 : 0;
+        jpPercentage = Math.max(50, Math.min(100, 50 + jpPercentage / 2));
+        
         const jDominant = this.scores.J > this.scores.P;
-        this.updateDimensionBar('jp', jPercentage, jDominant ? 'J' : 'P',
-                               jDominant ? Math.round(jPercentage) + '% 判断' : Math.round(100-jPercentage) + '% 知觉');
+        this.updateDimensionBar('jp', jpPercentage, jDominant ? 'J' : 'P',
+                               jDominant ? Math.round(jpPercentage) + '% 判断' : Math.round(jpPercentage) + '% 知觉');
     }
 
     updateDimensionBar(dimension, percentage, dominantType, label) {
