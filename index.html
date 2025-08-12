@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>16型人格测试</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>16型人格测试</h1>
+            <p>探索你的性格类型</p>
+        </header>
+        
+        <div id="welcome-screen" class="screen active">
+            <div class="welcome-content">
+                <h2>欢迎参加16型人格测试</h2>
+                <p>这是一个基于心理学的性格测试，将帮助您了解自己的性格类型。</p>
+                <p>请根据您的真实想法和行为习惯回答问题，没有对错之分。</p>
+                
+                <div class="test-mode-selection">
+                    <h3>选择测试模式</h3>
+                    <div class="mode-options">
+                        <div class="mode-card" data-mode="simple">
+                            <div class="mode-icon">⚡</div>
+                            <h4>标准测试</h4>
+                            <p>60道经典题目</p>
+                            <span class="mode-time">约10-15分钟</span>
+                            <p class="mode-desc">标准MBTI测试题库，平衡全面，适合大多数用户</p>
+                        </div>
+                        <div class="mode-card active" data-mode="complex">
+                            <div class="mode-icon">🔍</div>
+                            <h4>深度测试</h4>
+                            <p>120道详细题目</p>
+                            <span class="mode-time">约20-25分钟</span>
+                            <p class="mode-desc">深度全面分析，涵盖更多场景，获得最精确的测试结果</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <button id="start-test" class="btn primary">开始测试</button>
+            </div>
+        </div>
+        
+        <div id="test-screen" class="screen">
+            <div class="progress-bar">
+                <div class="progress" id="progress"></div>
+            </div>
+            <div class="question-counter">
+                <span id="current-question">1</span> / <span id="total-questions">60</span>
+            </div>
+            <div class="question-content">
+                <h3 id="question-text"></h3>
+                <div class="rating-container">
+                    <div class="rating-labels">
+                        <span class="label-left">不同意</span>
+                        <span class="label-right">同意</span>
+                    </div>
+                    <div class="rating-options">
+                        <button class="option-circle" data-value="1" title="非常不同意"></button>
+                        <button class="option-circle" data-value="2" title="不同意"></button>
+                        <button class="option-circle" data-value="3" title="稍微不同意"></button>
+                        <button class="option-circle" data-value="4" title="中立"></button>
+                        <button class="option-circle" data-value="5" title="稍微同意"></button>
+                        <button class="option-circle" data-value="6" title="同意"></button>
+                        <button class="option-circle" data-value="7" title="非常同意"></button>
+                    </div>
+                </div>
+                <div class="navigation-buttons">
+                    <button id="prev-btn" class="btn secondary">上一题</button>
+                </div>
+            </div>
+        </div>
+        
+        <div id="result-screen" class="screen">
+            <div class="result-content">
+                <h2>您的人格类型是：</h2>
+                <div class="personality-type">
+                    <span id="personality-code"></span>
+                    <h3 id="personality-name"></h3>
+                </div>
+                <div class="personality-description">
+                    <p id="personality-desc"></p>
+                </div>
+                <div class="dimensions">
+                    <div class="dimension">
+                        <label>外向 vs 内向:</label>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="ei-bar"></div>
+                        </div>
+                        <span id="ei-label"></span>
+                    </div>
+                    <div class="dimension">
+                        <label>实感 vs 直觉:</label>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="sn-bar"></div>
+                        </div>
+                        <span id="sn-label"></span>
+                    </div>
+                    <div class="dimension">
+                        <label>思考 vs 情感:</label>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="tf-bar"></div>
+                        </div>
+                        <span id="tf-label"></span>
+                    </div>
+                    <div class="dimension">
+                        <label>判断 vs 知觉:</label>
+                        <div class="dimension-bar">
+                            <div class="dimension-fill" id="jp-bar"></div>
+                        </div>
+                        <span id="jp-label"></span>
+                    </div>
+                </div>
+                <button id="restart-test" class="btn secondary">重新测试</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="questions.js"></script>
+    <script src="personalities.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
