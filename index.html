@@ -132,11 +132,26 @@
                     </div>
                 </div>
                 
-                <button id="restart-test" class="btn secondary">重新测试</button>
+                <div class="result-actions">
+                    <button id="restart-test" class="btn secondary">重新测试</button>
+                    <button id="share-result" class="btn primary">📤 分享结果</button>
+                    <button id="save-image" class="btn secondary">💾 保存图片</button>
+                </div>
+                
+                <div class="social-share" style="margin-top: 1rem; text-align: center;">
+                    <p style="color: #666; font-size: 0.9rem; margin-bottom: 0.8rem;">快速分享到：</p>
+                    <div class="social-buttons">
+                        <button id="share-wechat" class="social-btn" title="微信">💬</button>
+                        <button id="share-qq" class="social-btn" title="QQ">🐧</button>
+                        <button id="share-weibo" class="social-btn" title="微博">📢</button>
+                        <button id="copy-link" class="social-btn" title="复制链接">🔗</button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
     
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="questions.js"></script>
     <script src="personalities.js"></script>
     <script src="app.js"></script>

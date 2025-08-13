@@ -452,3 +452,91 @@ header p {
     }
 }
 
+.result-actions {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 2rem;
+}
+
+.result-actions .btn {
+    min-width: 120px;
+}
+
+@media (max-width: 480px) {
+    .result-actions {
+        flex-direction: column;
+        align-items: center;
+    }
+    
+    .result-actions .btn {
+        width: 200px;
+    }
+}
+
+/* Social sharing styles */
+.social-buttons {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: center;
+    align-items: center;
+}
+
+.social-btn {
+    width: 45px;
+    height: 45px;
+    border: none;
+    border-radius: 50%;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-decoration: none;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+}
+
+.social-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.25);
+}
+
+.social-btn:active {
+    transform: translateY(0);
+}
+
+/* Specific social button colors */
+.social-btn:nth-child(1) { /* 微信 */
+    background: linear-gradient(135deg, #07c160 0%, #1aad19 100%);
+    color: white;
+}
+
+.social-btn:nth-child(2) { /* QQ */
+    background: linear-gradient(135deg, #12b7f5 0%, #0099ff 100%);
+    color: white;
+}
+
+.social-btn:nth-child(3) { /* 微博 */
+    background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+    color: white;
+}
+
+.social-btn:nth-child(4) { /* 复制链接 */
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+@media (max-width: 480px) {
+    .social-buttons {
+        gap: 0.6rem;
+    }
+    
+    .social-btn {
+        width: 40px;
+        height: 40px;
+        font-size: 1rem;
+    }
+}
+

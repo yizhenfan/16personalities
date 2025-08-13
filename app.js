@@ -45,6 +45,35 @@ class PersonalityTest {
             });
         });
 
+        // 绑定分享和保存功能
+        document.getElementById('share-result').addEventListener('click', () => {
+            this.shareResult();
+        });
+
+        document.getElementById('save-image').addEventListener('click', () => {
+            this.saveResultAsImage();
+        });
+
+        // 绑定社交媒体分享按钮
+        document.getElementById('share-wechat').addEventListener('click', () => {
+            this.shareToWechat();
+        });
+
+        document.getElementById('share-qq').addEventListener('click', () => {
+            this.shareToQQ();
+        });
+
+        document.getElementById('share-weibo').addEventListener('click', () => {
+            this.shareToWeibo();
+        });
+
+        document.getElementById('copy-link').addEventListener('click', () => {
+            this.copyShareLink();
+        });
+
+        // 检查是否通过分享链接访问
+        this.checkSharedLink();
+
     }
 
     selectMode(card) {
@@ -388,6 +417,397 @@ class PersonalityTest {
         });
         
         this.showWelcomeScreen();
+    }
+
+    checkSharedLink() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedType = urlParams.get('shared');
+        const ref = urlParams.get('ref');
+        
+        if (sharedType && ref === 'share') {
+            // 通过分享链接访问
+            const personality = personalities[sharedType];
+            if (personality) {
+                this.showSharedResultPrompt(sharedType, personality);
+            }
+        }
+    }
+
+    showSharedResultPrompt(personalityType, personality) {
+        // 创建分享提示横幅
+        const banner = document.createElement('div');
+        banner.style.cssText = `
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 15px 20px;
+            text-align: center;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+            animation: slideDown 0.5s ease-out;
+        `;
+        
+        banner.innerHTML = `
+            <div style="max-width: 800px; margin: 0 auto;">
+                <strong>🎉 朋友分享了他们的测试结果：${personalityType} - ${personality.name}！</strong>
+                <br>
+                <span style="font-size: 0.9rem; opacity: 0.9;">你也来测测你的人格类型吧！</span>
+                <button onclick="this.parentElement.parentElement.remove()" style="
+                    background: rgba(255,255,255,0.2);
+                    border: none;
+                    color: white;
+                    padding: 5px 10px;
+                    border-radius: 15px;
+                    margin-left: 15px;
+                    cursor: pointer;
+                    font-size: 0.8rem;
+                ">关闭</button>
+            </div>
+        `;
+        
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideDown {
+                from {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+                to {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(banner);
+        
+        // 5秒后自动隐藏
+        setTimeout(() => {
+            if (banner.parentNode) {
+                banner.style.animation = 'slideUp 0.5s ease-out forwards';
+                banner.style.animationFillMode = 'forwards';
+                setTimeout(() => banner.remove(), 500);
+            }
+        }, 5000);
+        
+        // 添加向上滑动动画
+        style.textContent += `
+            @keyframes slideUp {
+                from {
+                    transform: translateY(0);
+                    opacity: 1;
+                }
+                to {
+                    transform: translateY(-100%);
+                    opacity: 0;
+                }
+            }
+        `;
+        
+        // 调整页面顶部间距
+        document.body.style.paddingTop = '80px';
+        
+        // 横幅关闭时恢复间距
+        const originalRemove = banner.remove.bind(banner);
+        banner.remove = function() {
+            document.body.style.paddingTop = '0';
+            originalRemove();
+        };
+    }
+
+    shareResult() {
+        const personalityType = this.determinePersonalityType();
+        const personality = personalities[personalityType];
+        
+        // 生成带参数的个性化链接
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?shared=${personalityType}&ref=share`;
+        
+        // 生成吸引人的分享内容
+        const shareTitle = '我的16型人格测试结果出炉！';
+        const shareText = `🎯 我的人格类型：${personalityType} - ${personality.name}\n\n✨ ${personality.description}\n\n💼 适合职业：${personality.careers.split('、').slice(0, 3).join('、')}等\n\n🔗 你也来测测你的人格类型吧！`;
+        
+        // 检查是否支持Web Share API
+        if (navigator.share) {
+            navigator.share({
+                title: shareTitle,
+                text: shareText,
+                url: shareUrl
+            }).catch(err => {
+                console.log('分享失败:', err);
+                this.fallbackShare(shareText, shareUrl);
+            });
+        } else {
+            this.fallbackShare(shareText, shareUrl);
+        }
+    }
+
+    fallbackShare(shareText, shareUrl) {
+        // 将链接也加入分享内容
+        const fullShareText = `${shareText}\n\n${shareUrl}`;
+        
+        // 复制到剪贴板作为备选方案
+        if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard.writeText(fullShareText).then(() => {
+                alert('结果和链接已复制到剪贴板！您可以粘贴到任何地方分享。');
+            }).catch(() => {
+                this.showShareModal(fullShareText, shareUrl);
+            });
+        } else {
+            this.showShareModal(fullShareText, shareUrl);
+        }
+    }
+
+    showShareModal(shareText, shareUrl) {
+        // 创建模态框显示分享文本
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+            z-index: 9999; padding: 20px;
+        `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        `;
+        
+        content.innerHTML = `
+            <h3 style="margin-top: 0; color: #333;">分享我的测试结果</h3>
+            <textarea style="width: 100%; height: 120px; padding: 10px; border: 2px solid #ddd; border-radius: 8px; font-family: inherit; resize: none;" readonly>${shareText}</textarea>
+            <div style="margin-top: 20px; text-align: right;">
+                <button style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer; margin-left: 10px;" onclick="this.closest('.modal').remove()">关闭</button>
+            </div>
+        `;
+        
+        modal.className = 'modal';
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+        
+        // 选中文本
+        const textarea = content.querySelector('textarea');
+        textarea.select();
+        textarea.setSelectionRange(0, 99999); // 移动设备兼容
+        
+        // 点击模态框外部关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    async saveResultAsImage() {
+        try {
+            // 显示加载提示
+            const saveBtn = document.getElementById('save-image');
+            const originalText = saveBtn.textContent;
+            saveBtn.textContent = '生成中...';
+            saveBtn.disabled = true;
+            
+            // 获取结果区域
+            const resultContent = document.querySelector('.result-content');
+            
+            // 临时隐藏按钮以获得更好的截图效果
+            const actionsDiv = document.querySelector('.result-actions');
+            actionsDiv.style.display = 'none';
+            
+            // 使用html2canvas生成图片
+            const canvas = await html2canvas(resultContent, {
+                backgroundColor: '#ffffff',
+                scale: 2, // 提高图片质量
+                useCORS: true,
+                logging: false,
+                width: resultContent.offsetWidth,
+                height: resultContent.offsetHeight
+            });
+            
+            // 恢复按钮显示
+            actionsDiv.style.display = '';
+            saveBtn.textContent = originalText;
+            saveBtn.disabled = false;
+            
+            // 转换为图片并下载
+            canvas.toBlob((blob) => {
+                const personalityType = this.determinePersonalityType();
+                const personality = personalities[personalityType];
+                
+                const link = document.createElement('a');
+                link.download = `我的人格类型_${personalityType}_${personality.name}.png`;
+                link.href = URL.createObjectURL(blob);
+                
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                
+                URL.revokeObjectURL(link.href);
+                
+                // 成功提示
+                alert('图片已保存到下载文件夹！');
+            }, 'image/png');
+            
+        } catch (error) {
+            console.error('保存图片失败:', error);
+            alert('保存图片失败，请重试。');
+            
+            // 恢复按钮状态
+            const saveBtn = document.getElementById('save-image');
+            saveBtn.textContent = '保存图片';
+            saveBtn.disabled = false;
+            
+            // 恢复按钮显示
+            document.querySelector('.result-actions').style.display = '';
+        }
+    }
+
+    shareToWechat() {
+        const personalityType = this.determinePersonalityType();
+        const personality = personalities[personalityType];
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?shared=${personalityType}&ref=wechat`;
+        
+        const shareText = `🎯 我在16型人格测试中是：${personalityType} - ${personality.name}！\n\n✨ ${personality.description}\n\n💼 我适合的职业：${personality.careers.split('、').slice(0, 3).join('、')}等\n\n🔗 你也来测测看你是什么人格类型吧！`;
+        
+        // 微信不支持直接分享，显示二维码或提示用户手动分享
+        this.showWechatShareModal(shareText, shareUrl);
+    }
+
+    shareToQQ() {
+        const personalityType = this.determinePersonalityType();
+        const personality = personalities[personalityType];
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?shared=${personalityType}&ref=qq`;
+        
+        const title = `我的16型人格测试结果：${personalityType} - ${personality.name}`;
+        const summary = `${personality.description.substring(0, 100)}... 快来测试你的人格类型！`;
+        
+        // QQ分享链接
+        const qqShareUrl = `http://connect.qq.com/widget/shareqq/index.html?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(title)}&summary=${encodeURIComponent(summary)}&site=${encodeURIComponent('16型人格测试')}`;
+        
+        window.open(qqShareUrl, '_blank', 'width=600,height=400');
+    }
+
+    shareToWeibo() {
+        const personalityType = this.determinePersonalityType();
+        const personality = personalities[personalityType];
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?shared=${personalityType}&ref=weibo`;
+        
+        const shareText = `🎯 我的16型人格测试结果：${personalityType} - ${personality.name}！${personality.description.substring(0, 80)}... 你也来测试看看吧！`;
+        
+        // 微博分享链接
+        const weiboShareUrl = `http://service.weibo.com/share/share.php?url=${encodeURIComponent(shareUrl)}&title=${encodeURIComponent(shareText)}&pic=&appkey=`;
+        
+        window.open(weiboShareUrl, '_blank', 'width=600,height=400');
+    }
+
+    async copyShareLink() {
+        const personalityType = this.determinePersonalityType();
+        const personality = personalities[personalityType];
+        const baseUrl = window.location.origin + window.location.pathname;
+        const shareUrl = `${baseUrl}?shared=${personalityType}&ref=copy`;
+        
+        const shareText = `🎯 我的16型人格测试结果：${personalityType} - ${personality.name}！\n\n✨ ${personality.description}\n\n💼 适合职业：${personality.careers.split('、').slice(0, 3).join('、')}等\n\n🔗 测试链接：${shareUrl}\n\n你也来测试看看你是什么人格类型吧！`;
+        
+        try {
+            await navigator.clipboard.writeText(shareText);
+            this.showCopySuccess();
+        } catch (err) {
+            // 备选方案：选中文本
+            this.showShareModal(shareText, shareUrl);
+        }
+    }
+
+    showWechatShareModal(shareText, shareUrl) {
+        const modal = document.createElement('div');
+        modal.style.cssText = `
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: rgba(0,0,0,0.8); display: flex; align-items: center; justify-content: center;
+            z-index: 9999; padding: 20px;
+        `;
+        
+        const content = document.createElement('div');
+        content.style.cssText = `
+            background: white; padding: 30px; border-radius: 15px; max-width: 500px; width: 100%;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3); text-align: center;
+        `;
+        
+        content.innerHTML = `
+            <div style="color: #07c160; font-size: 2rem; margin-bottom: 1rem;">💬</div>
+            <h3 style="margin-bottom: 1rem; color: #333;">分享到微信</h3>
+            <p style="color: #666; margin-bottom: 1.5rem; line-height: 1.5;">复制下方链接和文案，在微信中分享给好友或发朋友圈</p>
+            <textarea style="width: 100%; height: 150px; padding: 15px; border: 2px solid #e0e0e0; border-radius: 8px; font-family: inherit; resize: none; font-size: 14px;" readonly>${shareText}\n\n${shareUrl}</textarea>
+            <div style="margin-top: 20px;">
+                <button id="copy-wechat-text" style="padding: 12px 24px; background: #07c160; color: white; border: none; border-radius: 8px; cursor: pointer; margin-right: 10px; font-size: 14px;">📋 复制内容</button>
+                <button style="padding: 12px 24px; background: #f0f0f0; color: #333; border: none; border-radius: 8px; cursor: pointer; font-size: 14px;" onclick="this.closest('.modal').remove()">关闭</button>
+            </div>
+        `;
+        
+        modal.className = 'modal';
+        modal.appendChild(content);
+        document.body.appendChild(modal);
+        
+        // 复制功能
+        content.querySelector('#copy-wechat-text').addEventListener('click', async () => {
+            const textarea = content.querySelector('textarea');
+            try {
+                await navigator.clipboard.writeText(textarea.value);
+                const btn = content.querySelector('#copy-wechat-text');
+                btn.textContent = '✅ 已复制';
+                btn.style.background = '#52c41a';
+                setTimeout(() => {
+                    btn.textContent = '📋 复制内容';
+                    btn.style.background = '#07c160';
+                }, 2000);
+            } catch (err) {
+                textarea.select();
+                textarea.setSelectionRange(0, 99999);
+            }
+        });
+        
+        // 点击模态框外部关闭
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.remove();
+            }
+        });
+    }
+
+    showCopySuccess() {
+        const toast = document.createElement('div');
+        toast.style.cssText = `
+            position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            background: #52c41a; color: white; padding: 15px 25px; border-radius: 8px;
+            z-index: 10000; font-size: 16px; font-weight: 500;
+            box-shadow: 0 4px 20px rgba(82, 196, 26, 0.3);
+            animation: fadeInOut 2s ease-in-out forwards;
+        `;
+        
+        toast.textContent = '✅ 链接和文案已复制到剪贴板！';
+        
+        // 添加动画样式
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes fadeInOut {
+                0% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+                20%, 80% { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+                100% { opacity: 0; transform: translate(-50%, -50%) scale(0.8); }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        document.body.appendChild(toast);
+        
+        setTimeout(() => {
+            toast.remove();
+            style.remove();
+        }, 2000);
     }
 }
 
