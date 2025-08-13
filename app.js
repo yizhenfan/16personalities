@@ -275,47 +275,61 @@ class PersonalityTest {
     }
 
     displayDimensionScores() {
-        // Calculate percentages for each dimension based on absolute strength
+        // 更科学的百分比计算方法
+        // 基于标准化的强度计算，避免极端值
         
         // E/I dimension
-        const eiDiff = Math.abs(this.scores.E - this.scores.I);
-        const eiTotal = Math.abs(this.scores.E) + Math.abs(this.scores.I);
-        let eiPercentage = eiTotal > 0 ? (eiDiff / eiTotal) * 100 : 0;
-        eiPercentage = Math.max(50, Math.min(100, 50 + eiPercentage / 2)); // 确保在50-100之间
-        
+        const eiStrength = this.calculateDimensionStrength(this.scores.E, this.scores.I);
         const eDominant = this.scores.E > this.scores.I;
-        this.updateDimensionBar('ei', eiPercentage, eDominant ? 'E' : 'I', 
-                               eDominant ? Math.round(eiPercentage) + '% 外向' : Math.round(eiPercentage) + '% 内向');
+        this.updateDimensionBar('ei', eiStrength, eDominant ? 'E' : 'I', 
+                               eDominant ? Math.round(eiStrength) + '% 外向' : Math.round(eiStrength) + '% 内向');
         
-        // S/N dimension
-        const snDiff = Math.abs(this.scores.S - this.scores.N);
-        const snTotal = Math.abs(this.scores.S) + Math.abs(this.scores.N);
-        let snPercentage = snTotal > 0 ? (snDiff / snTotal) * 100 : 0;
-        snPercentage = Math.max(50, Math.min(100, 50 + snPercentage / 2));
-        
+        // S/N dimension  
+        const snStrength = this.calculateDimensionStrength(this.scores.S, this.scores.N);
         const sDominant = this.scores.S > this.scores.N;
-        this.updateDimensionBar('sn', snPercentage, sDominant ? 'S' : 'N',
-                               sDominant ? Math.round(snPercentage) + '% 实感' : Math.round(snPercentage) + '% 直觉');
+        this.updateDimensionBar('sn', snStrength, sDominant ? 'S' : 'N',
+                               sDominant ? Math.round(snStrength) + '% 实感' : Math.round(snStrength) + '% 直觉');
         
         // T/F dimension
-        const tfDiff = Math.abs(this.scores.T - this.scores.F);
-        const tfTotal = Math.abs(this.scores.T) + Math.abs(this.scores.F);
-        let tfPercentage = tfTotal > 0 ? (tfDiff / tfTotal) * 100 : 0;
-        tfPercentage = Math.max(50, Math.min(100, 50 + tfPercentage / 2));
-        
+        const tfStrength = this.calculateDimensionStrength(this.scores.T, this.scores.F);
         const tDominant = this.scores.T > this.scores.F;
-        this.updateDimensionBar('tf', tfPercentage, tDominant ? 'T' : 'F',
-                               tDominant ? Math.round(tfPercentage) + '% 思考' : Math.round(tfPercentage) + '% 情感');
+        this.updateDimensionBar('tf', tfStrength, tDominant ? 'T' : 'F',
+                               tDominant ? Math.round(tfStrength) + '% 思考' : Math.round(tfStrength) + '% 情感');
         
         // J/P dimension
-        const jpDiff = Math.abs(this.scores.J - this.scores.P);
-        const jpTotal = Math.abs(this.scores.J) + Math.abs(this.scores.P);
-        let jpPercentage = jpTotal > 0 ? (jpDiff / jpTotal) * 100 : 0;
-        jpPercentage = Math.max(50, Math.min(100, 50 + jpPercentage / 2));
-        
+        const jpStrength = this.calculateDimensionStrength(this.scores.J, this.scores.P);
         const jDominant = this.scores.J > this.scores.P;
-        this.updateDimensionBar('jp', jpPercentage, jDominant ? 'J' : 'P',
-                               jDominant ? Math.round(jpPercentage) + '% 判断' : Math.round(jpPercentage) + '% 知觉');
+        this.updateDimensionBar('jp', jpStrength, jDominant ? 'J' : 'P',
+                               jDominant ? Math.round(jpStrength) + '% 判断' : Math.round(jpStrength) + '% 知觉');
+    }
+
+    calculateDimensionStrength(score1, score2) {
+        // 如果两个分数都是0（没有回答相关题目），返回50%
+        if (score1 === 0 && score2 === 0) {
+            return 50;
+        }
+        
+        // 计算总的"倾向强度" - 两个分数的绝对值之和
+        const totalAbsolute = Math.abs(score1) + Math.abs(score2);
+        
+        // 如果总强度为0，返回50%（完全中性）
+        if (totalAbsolute === 0) {
+            return 50;
+        }
+        
+        // 计算差异强度
+        const difference = Math.abs(score1 - score2);
+        
+        // 将差异转换为百分比强度
+        // 使用开方函数来减缓极端值，使结果更加合理
+        let strengthRatio = difference / totalAbsolute;
+        strengthRatio = Math.sqrt(strengthRatio); // 开方减缓
+        
+        // 转换为50%-100%的范围
+        const percentage = 50 + (strengthRatio * 50);
+        
+        // 确保结果在合理范围内
+        return Math.max(50, Math.min(95, percentage)); // 最高95%而非100%
     }
 
     updateDimensionBar(dimension, percentage, dominantType, label) {
