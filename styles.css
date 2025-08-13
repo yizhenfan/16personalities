@@ -353,6 +353,36 @@ header p {
     color: #667eea;
 }
 
+.detailed-analysis {
+    margin: 2rem 0;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 1.5rem;
+}
+
+.analysis-section {
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 1.5rem;
+    border-left: 4px solid #667eea;
+}
+
+.analysis-section h4 {
+    color: #333;
+    font-size: 1.2rem;
+    margin-bottom: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.analysis-section p {
+    color: #555;
+    line-height: 1.6;
+    font-size: 1rem;
+    margin: 0;
+}
+
 @media (max-width: 768px) {
     .container {
         width: 95%;
@@ -402,6 +432,23 @@ header p {
     
     .mode-icon {
         font-size: 2rem;
+    }
+    
+    .detailed-analysis {
+        margin: 1.5rem 0;
+        gap: 1rem;
+    }
+    
+    .analysis-section {
+        padding: 1.2rem;
+    }
+    
+    .analysis-section h4 {
+        font-size: 1.1rem;
+    }
+    
+    .analysis-section p {
+        font-size: 0.95rem;
     }
 }
 

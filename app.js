@@ -265,6 +265,11 @@ class PersonalityTest {
         document.getElementById('personality-name').textContent = personality.name;
         document.getElementById('personality-desc').textContent = personality.description;
         
+        // Display detailed analysis
+        document.getElementById('career-suggestions').textContent = personality.careers;
+        document.getElementById('growth-advice').textContent = personality.growth;
+        document.getElementById('relationship-traits').textContent = personality.relationships;
+        
         // Display dimension scores
         this.displayDimensionScores();
     }
